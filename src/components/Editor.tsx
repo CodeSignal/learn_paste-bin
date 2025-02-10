@@ -38,7 +38,7 @@ function Editor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch('http://localhost:3000/api/snippets', {
+      const response = await fetch(API_ENDPOINTS.SNIPPETS, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(snippet),
