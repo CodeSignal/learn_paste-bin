@@ -38,7 +38,7 @@ DO NOT USE THIS IN PRODUCTION!
 1. Clone the repository:
 ```bash
 git clone [repository-url]
-cd pastebin-demo
+cd learn_paste-bin
 ```
 
 2. Install dependencies:
@@ -46,15 +46,9 @@ cd pastebin-demo
 npm install
 ```
 
-3. Create database and default user:
+3. Start the backend and frontend development server:
 ```bash
-npm run server
-```
-This will automatically create the SQLite database and a default admin user.
-
-4. Start the frontend development server:
-```bash
-npm run dev
+npm run dev:all
 ```
 
 ## Usage
@@ -106,31 +100,10 @@ src/
 
 ## Development
 
-Backend server runs on port 3000:
+Both backend and frontend run on port 3000:
 ```bash
-npm run server
+npm run dev:all
 ```
-
-Frontend development server runs on port 5173:
-```bash
-npm run dev
-```
-
-## Dependencies
-
-### Backend
-- express
-- sequelize
-- sqlite3
-- jsonwebtoken
-- bcryptjs
-- cors
-
-### Frontend
-- react
-- react-router-dom
-- @uiw/react-codemirror
-- Various CodeMirror language packages
 
 ## Contributing
 
