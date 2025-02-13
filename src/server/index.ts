@@ -18,8 +18,7 @@ app.use(express.json());
 // Serve static files from the dist/client directory
 app.use(express.static(join(__dirname, '../../dist/client')));
 
-
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const JWT_SECRET = 'your-secret-key';
 
 // Initialize database
