@@ -3,7 +3,7 @@ import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 import { Snippet } from './models/Snippet.js';
 import { User } from './models/User.js';
 import { sequelize } from './models/index.js';
@@ -15,7 +15,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = 3001;
+// Serve static files from the dist/client directory
+app.use(express.static(join(__dirname, '../../dist/client')));
+
+
+const PORT = process.env.PORT || 3000;
 const JWT_SECRET = 'your-secret-key';
 
 // Initialize database
@@ -58,6 +62,11 @@ app.post('/api/snippets', async (req, res) => {
 app.get('/api/snippets/:id', async (req, res) => {
   const snippet = await Snippet.findByPk(req.params.id);
   res.json(snippet);
+});
+
+// Catch-all route to serve index.html for client-side routing
+app.get('*', (_, res) => {
+  res.sendFile(join(__dirname, '../../dist/client/index.html'));
 });
 
 app.listen(PORT, () => {
