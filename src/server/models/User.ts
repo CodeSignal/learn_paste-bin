@@ -5,6 +5,7 @@ export class User extends Model {
   declare id: number;
   declare username: string;
   declare password: string;
+  declare role: string; // new field for user role
 }
 
 User.init({
@@ -14,7 +15,11 @@ User.init({
     autoIncrement: true
   },
   username: DataTypes.STRING,
-  password: DataTypes.STRING
+  password: DataTypes.STRING,
+  role: {
+    type: DataTypes.ENUM('user', 'admin'),
+    defaultValue: 'user'
+  }
 }, {
   sequelize,
   modelName: 'User'

@@ -14,17 +14,23 @@ function SnippetList() {
     ? location.pathname.split('/snippet/')[1]
     : '';
 
-  useEffect(() => {
-    fetch(API_ENDPOINTS.SNIPPETS)
-      .then(res => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch snippets');
-        }
-        return res.json();
-      })
-      .then(setSnippets)
-      .catch(error => console.error("Error fetching snippets:", error));
-  }, [location]);
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        const token = storedUser ? JSON.parse(storedUser).token : '';
+        fetch(API_ENDPOINTS.SNIPPETS, {
+            headers: {
+            'Authorization': `Bearer ${token}`,
+            },
+        })
+            .then(res => {
+            if (!res.ok) {
+                throw new Error('Failed to fetch snippets');
+            }
+            return res.json();
+            })
+            .then(setSnippets)
+            .catch(error => console.error("Error fetching snippets:", error));
+        }, [location]);
 
   const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const snippetId = e.target.value;

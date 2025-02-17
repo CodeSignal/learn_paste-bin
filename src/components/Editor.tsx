@@ -39,9 +39,16 @@ function Editor() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Retrieve the token from the stored user
+      const storedUser = localStorage.getItem('user');
+      const token = storedUser ? JSON.parse(storedUser).token : '';
+  
       const response = await fetch(API_ENDPOINTS.SNIPPETS, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`  // include token here
+        },
         body: JSON.stringify(snippet),
       });
       if (!response.ok) {
@@ -55,7 +62,7 @@ function Editor() {
       setSaving(false);
     }
   };
-
+  
   // Delete handler with confirmation and state clearing
   const handleDelete = async () => {
     if (!snippet.id) return;

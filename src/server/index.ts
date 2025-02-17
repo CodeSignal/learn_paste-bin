@@ -20,20 +20,39 @@ app.use(express.json());
 app.use(express.static(join(__dirname, '../../dist/client')));
 
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = 'your-secret-key'; // remains hard-coded
+const JWT_SECRET = 'your-secret-key';
 
 // Initialize database
-sequelize.sync().then(async () => {
+// Instead of sequelize.sync()
+sequelize.sync({ alter: true }).then(async () => {
   try {
-    // Create default user if it doesn't exist
-    const hashedPassword = await bcrypt.hash('admin', 10);
-    await User.findOrCreate({
-      where: { username: 'admin' },
-      defaults: { password: hashedPassword }
-    });
-    console.log("Database initialized with default user.");
+    console.log("Database synchronized with alter: true.");
   } catch (error) {
     console.error("Error initializing database:", error);
+  }
+});
+
+
+// Register endpoint
+app.post('/api/register', async (req, res) => {
+  const { username, password, role } = req.body;
+  // Ensure role is either 'admin' or 'user'; default to 'user'
+  const userRole = role === 'admin' ? 'admin' : 'user';
+  try {
+    const existingUser = await User.findOne({ where: { username } });
+    if (existingUser) {
+      return res.status(400).json({ error: "Username already exists" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      username,
+      password: hashedPassword,
+      role: userRole
+    });
+    res.json({ message: "User registered successfully", userId: user.id });
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -57,31 +76,31 @@ app.post('/api/login', async (req, res) => {
 
 // Save snippet endpoint
 app.post('/api/snippets', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: "Missing authorization header" });
+  }
+  const token = authHeader.split(' ')[1];
+  let decoded: any;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+  const userId = decoded.userId;
   try {
     const { title, content, language } = req.body;
-    // Always generate a new unique id using uuidv4()
     const snippet = await Snippet.create({
       id: uuidv4(),
       title,
       content,
       language,
-      userId: 1
+      userId, // now using the userId from the token
     });
     res.json(snippet);
   } catch (error) {
     console.error("Error saving snippet:", error);
     res.status(500).json({ error: "Failed to save snippet" });
-  }
-});
-
-// List all snippets for userId 1
-app.get('/api/snippets', async (req, res) => {
-  try {
-    const snippets = await Snippet.findAll({ where: { userId: 1 } });
-    res.json(snippets);
-  } catch (error) {
-    console.error("Error retrieving snippets:", error);
-    res.status(500).json({ error: "Failed to retrieve snippets" });
   }
 });
 
@@ -100,6 +119,30 @@ app.get('/api/snippets/:id', async (req, res) => {
   }
 });
 
+app.get('/api/snippets', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: "Missing authorization header" });
+  }
+  const token = authHeader.split(' ')[1];
+  let decoded: any;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+  const userId = decoded.userId;
+  try {
+    const snippets = await Snippet.findAll({ where: { userId } });
+    res.json(snippets);
+  } catch (error) {
+    console.error("Error retrieving snippets:", error);
+    res.status(500).json({ error: "Failed to retrieve snippets" });
+  }
+});
+
+
+
 // Delete snippet endpoint
 app.delete('/api/snippets/:id', async (req, res) => {
   try {
@@ -115,6 +158,25 @@ app.delete('/api/snippets/:id', async (req, res) => {
   }
 });
 
+// Admin-only test endpoint
+app.get('/api/admin/test', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: "Missing authorization header" });
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const user = await User.findByPk(decoded.userId);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: "Access denied" });
+    }
+    res.json({ message: "Admin test endpoint accessed successfully" });
+  } catch (error) {
+    console.error("Error verifying token:", error);
+    res.status(401).json({ error: "Invalid token" });
+  }
+});
 
 // Catch-all route to serve index.html for client-side routing
 app.get('*', (_, res) => {
