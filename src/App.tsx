@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Editor from './components/Editor';
 import Login from './components/Login';
+import SnippetList from './components/SnippetList'; // new component
 import { User } from './types';
 import { styles } from './styles';
 
@@ -32,12 +33,15 @@ function App() {
       <div style={styles.container}>
         <header style={styles.header}>
           <h1>CodeSignal Code Snippet Tool</h1>
-          <button 
-            onClick={handleLogout} 
-            style={{...styles.button, ...styles.logoutButton}}
-          >
-            Logout
-          </button>
+          <div style={styles.headerControls}>
+            <SnippetList />
+            <button 
+              onClick={handleLogout} 
+              style={{...styles.button, ...styles.logoutButton}}
+            >
+              Logout
+            </button>
+          </div>
         </header>
         <Routes>
           <Route path="/" element={<Editor />} />
