@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
 import { JWT_SECRET_KEY } from '../../config';
 import { Role } from '../../types';
+import db from '../../database';
 
 const router = express.Router();
 
@@ -25,5 +26,30 @@ router.get('/test', async (req, res) => {
     res.status(401).json({ error: "Invalid token" });
   }
 });
+
+router.get('/testOpen', async (req, res) => {
+  res.json({ message: "Test endpoint is working!" });
+});
+
+// Secure account info endpoint
+router.get('/accountInfo', (req, res) => {
+  const userId = req.query.id;
+  if (!userId) {
+    return res.status(400).json({ error: "Missing user ID parameter" });
+  }
+
+  try {
+    const query = `SELECT * FROM users WHERE id = ?`;
+    // Prepare and execute the query synchronously
+    const stmt = db.prepare(query);
+    const results = stmt.all(userId);
+    res.json(results);
+  } catch (error) {
+    console.error("Database query error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 
 export default router;
