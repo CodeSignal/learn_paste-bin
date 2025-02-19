@@ -31,22 +31,57 @@ function Editor() {
     if (id) {
       fetch(API_ENDPOINTS.SNIPPET(id))
         .then(res => res.json())
-        .then(setSnippet);
+        .then(setSnippet)
+        .catch(error => console.error("Error fetching snippet:", error));
     }
   }, [id]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Retrieve the token from the stored user
+      const storedUser = localStorage.getItem('user');
+      const token = storedUser ? JSON.parse(storedUser).token : '';
+  
       const response = await fetch(API_ENDPOINTS.SNIPPETS, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`  // include token here
+        },
         body: JSON.stringify(snippet),
       });
+      if (!response.ok) {
+        throw new Error('Failed to save snippet');
+      }
       const savedSnippet = await response.json();
       navigate(`/snippet/${savedSnippet.id}`);
+    } catch (error) {
+      console.error('Error saving snippet:', error);
     } finally {
       setSaving(false);
+    }
+  };
+  
+  // Delete handler with confirmation and state clearing
+  const handleDelete = async () => {
+    if (!snippet.id) return;
+    const confirmDelete = window.confirm('Are you sure you want to delete this snippet?');
+    if (!confirmDelete) return;
+    try {
+      const response = await fetch(API_ENDPOINTS.SNIPPET(snippet.id), {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete snippet');
+      }
+      alert('Snippet deleted successfully.');
+      // Clear snippet state so the Editor becomes empty
+      setSnippet({ title: '', content: '', language: 'typescript' });
+      // Navigate back to home (empty snippet page)
+      navigate('/');
+    } catch (error) {
+      console.error("Error deleting snippet:", error);
     }
   };
 
@@ -98,6 +133,15 @@ function Editor() {
         >
           {saving ? 'Saving...' : 'Save'}
         </button>
+        {/* Delete button is shown only when a snippet exists (i.e. snippet.id is present) */}
+        {snippet.id && (
+          <button 
+            style={{ ...styles.button, ...styles.deleteButton }}
+            onClick={handleDelete}
+          >
+            Delete
+          </button>
+        )}
       </div>
       
       <div style={styles.editorWrapper}>

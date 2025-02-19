@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Editor from './components/Editor';
 import Login from './components/Login';
+import Register from './components/Register';
+import SnippetList from './components/SnippetList';
 import { User } from './types';
 import { styles } from './styles';
 
@@ -21,27 +23,41 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
+    window.location.href = '/login';
   };
-
-  if (!user) {
-    return <Login onLogin={setUser} />;
-  }
 
   return (
     <Router>
       <div style={styles.container}>
         <header style={styles.header}>
-          <h1>CodeSignal Code Snippet Tool</h1>
-          <button 
-            onClick={handleLogout} 
-            style={{...styles.button, ...styles.logoutButton}}
-          >
-            Logout
-          </button>
+          <div style={{ width: '100%', textAlign: 'center' }}>
+            <h1>CodeSignal Code Snippet Tool</h1>
+          </div>
+          {user && (
+            <div style={styles.headerControls}>
+              <SnippetList />
+              <button 
+                onClick={handleLogout} 
+                style={{ ...styles.button, ...styles.logoutButton }}
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </header>
         <Routes>
-          <Route path="/" element={<Editor />} />
-          <Route path="/snippet/:id" element={<Editor />} />
+          {user ? (
+            <>
+              <Route path="/" element={<Editor />} />
+              <Route path="/snippet/:id" element={<Editor />} />
+            </>
+          ) : (
+            <>
+              <Route path="/login" element={<Login onLogin={setUser} />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="*" element={<Login onLogin={setUser} />} />
+            </>
+          )}
         </Routes>
       </div>
     </Router>

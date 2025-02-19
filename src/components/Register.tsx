@@ -1,36 +1,31 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { User } from '../types';
+import { useNavigate } from 'react-router-dom';
 import { styles } from '../styles';
 import { API_ENDPOINTS } from '../config';
 
-interface LoginProps {
-  onLogin: (user: User) => void;
-}
-
-function Login({ onLogin }: LoginProps) {
+function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
     try {
-      const response = await fetch(API_ENDPOINTS.LOGIN, {
+      const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, role }),
       });
-      
       if (response.ok) {
-        const { token } = await response.json();
-        onLogin({ username, token });
-        navigate("/");
+        // Registration successful, navigate to login
+        alert("Registration successful! Please log in.");
+        navigate('/login');
       } else {
-        setError('Invalid credentials');
+        const data = await response.json();
+        setError(data.error || 'Registration failed');
       }
     } catch (err) {
       setError('Connection error. Please try again.');
@@ -39,7 +34,7 @@ function Login({ onLogin }: LoginProps) {
 
   return (
     <div style={styles.loginContainer}>
-      <h2 style={styles.loginTitle}>Login to CodeSignal Code Snippet Tool</h2>
+      <h2 style={styles.loginTitle}>Register</h2>
       <form style={styles.loginForm} onSubmit={handleSubmit}>
         <input
           style={styles.input}
@@ -55,20 +50,19 @@ function Login({ onLogin }: LoginProps) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <select
+          style={styles.select}
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+        >
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
         {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
-        <button type="submit" style={styles.button}>
-          Login
-        </button>
+        <button type="submit" style={styles.button}>Register</button>
       </form>
-      {/* New Register button */}
-      <div style={{ textAlign: 'center', marginTop: '10px' }}>
-        Don't have an account?{' '}
-        <Link to="/register" style={{ color: '#0070f3', textDecoration: 'none' }}>
-          Register
-        </Link>
-      </div>
     </div>
   );
 }
 
-export default Login;
+export default Register;
