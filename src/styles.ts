@@ -13,6 +13,19 @@ export const styles = {
       padding: '10px 0',
       borderBottom: '1px solid #eaeaea',
     },
+    headerControls: {
+      display: "flex",
+      gap: "10px",
+    },
+    deleteButton: {
+      backgroundColor: "#ff0000",
+      color: "#fff",
+    },
+    snippetListContainer: {
+      display: "flex",
+      flexDirection: "column" as "column",
+      gap: "10px",
+    },
     editorContainer: {
       display: 'flex',
       flexDirection: 'column' as const,

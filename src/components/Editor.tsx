@@ -17,10 +17,14 @@ const languages = {
   cpp: cpp()
 };
 
+const storedUser = localStorage.getItem('user');
+const userId = storedUser ? JSON.parse(storedUser).id : '';
+
 function Editor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [snippet, setSnippet] = useState<Snippet>({
+    userId: '',
     title: '',
     content: '',
     language: 'typescript'
@@ -77,7 +81,7 @@ function Editor() {
       }
       alert('Snippet deleted successfully.');
       // Clear snippet state so the Editor becomes empty
-      setSnippet({ title: '', content: '', language: 'typescript' });
+      setSnippet({ userId, title: '', content: '', language: 'typescript' });
       // Navigate back to home (empty snippet page)
       navigate('/');
     } catch (error) {
