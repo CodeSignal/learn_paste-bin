@@ -79,7 +79,6 @@ function Editor() {
       if (!response.ok) {
         throw new Error('Failed to delete snippet');
       }
-      alert('Snippet deleted successfully.');
       // Clear snippet state so the Editor becomes empty
       setSnippet({ userId, title: '', content: '', language: 'typescript' });
       // Navigate back to home (empty snippet page)
