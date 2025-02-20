@@ -27,7 +27,7 @@ router.get('/test', async (req, res) => {
   }
 });
 
-router.get('/testOpen', async (req, res) => {
+router.get('/testOpen', async (_req, res) => {
   res.json({ message: "Test endpoint is working!" });
 });
 

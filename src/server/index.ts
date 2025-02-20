@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import { User } from './models/User.js';
 import { sequelize } from './models/index.js';
 import routes from './routes/index.js';
+import { Role } from '../types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,7 +27,7 @@ sequelize.sync({ alter: true }).then(async () => {
     const hashedPassword = await bcrypt.hash('admin', 10);
     await User.findOrCreate({
       where: { username: 'admin' },
-      defaults: { password: hashedPassword }
+      defaults: { password: hashedPassword, role: Role.ADMIN.toString() }
     });
   } catch (error) {
     console.error("Error initializing database:", error);
