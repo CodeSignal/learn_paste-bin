@@ -2,7 +2,8 @@
 FROM node:20-slim
 
 # Install build dependencies for sqlite3
-RUN apt-get update && apt-get install -y \
+RUN apt-get update
+RUN apt-get install -y \
     python3 \
     make \
     g++ \
